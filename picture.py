@@ -30,7 +30,6 @@ class Picture:
             new_filename = self.change_extension(self.filename, 'jpg')
 
         src = Image(filename=self.filename)
-        convert = src.convert('jpg')
         if src.width * src.height > 1600000:
             if src.width > src.height:
                 new_width = min(src.width, 1200)
@@ -40,7 +39,9 @@ class Picture:
                 new_width = new_height / (src.height / src.width)
             src.resize(int(new_width), int(new_height))
         
-        library.MagickSetCompressionQuality(src.wand, 85)
+        convert = src.convert('jpg')
+        
+        library.MagickSetCompressionQuality(convert.wand, 80)
         convert.save(filename=new_filename)
         self.filename = new_filename
 
