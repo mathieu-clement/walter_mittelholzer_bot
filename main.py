@@ -13,6 +13,7 @@ class RandomPictureBot:
 
     def __init__(self):
         self.logger = logging.getLogger('wm.RandomPictureBot')
+        self.logger.setLevel(logging.DEBUG)
         self.logger.info('Initializing...')
 
         self.picture_generator = PictureGenerator()
@@ -48,6 +49,7 @@ class RandomPictureBot:
     def fetch_and_post(self):
         pic = self.random_picture()
         pic.download(pic.filename)
+        pic.convert_to_jpeg()
 
         if pic.link:
             pic.link = self.shorten(pic.link)
@@ -55,5 +57,9 @@ class RandomPictureBot:
 
 
 if __name__ == '__main__':
+
+    logger = logging.getLogger('wm')
+    logger.setLevel(logging.DEBUG)
+
     bot = RandomPictureBot()
     bot.fetch_and_post()

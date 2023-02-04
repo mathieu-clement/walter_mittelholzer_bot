@@ -7,6 +7,7 @@ from mastodon import Mastodon
 class MastodonClient:
     def __init__(self, access_token):
         self.logger = logging.getLogger('wm.MastodonClient')
+        self.logger.setLevel(logging.DEBUG)
         self.mastodon = Mastodon(access_token=access_token, api_base_url = 'https://mastodon.citrouille.ch')
 
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import logging
 import random
 import tempfile
 import pywikibot
@@ -14,6 +15,8 @@ class RandomPictureGenerator:
 class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
     
     def __init__(self):
+        self.logger = logging.getLogger('wm.WikimediaCommonsRandomPictureGenerator')
+        self.logger.setLevel(logging.DEBUG)
         site = pywikibot.Site('commons') # Wikimedia Commons
         self.top_category = pywikibot.Category(site, 'Walter Mittelholzer')
         
@@ -65,12 +68,11 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
         download = filepage.download
 
         metadata = self.extra_metadata(filepage.get())
-        #print(filepage.get())
-        #print()
+        self.logger.debug(filepage.get())
         place = metadata['depicted place'] if 'depicted place' in metadata else None
         date  = metadata['date'] if 'date' in metadata else None
         if date is not None and 'Taken on' in date:
-            #print(date)
+            self.logger.debug("date taken on: %s" % date)
             date = date.split('|')[1]
         if date is not None and 'date|between' in date:
             start, end = date.replace('{{','').replace('}}','').split('|')[2:4]
@@ -78,6 +80,9 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
         title  = metadata['title'] if 'title' in metadata else None
         if title is not None and '}}' in title:
             title = title.split('}}')[0]
+
+        if title is None:
+            title = filepage.title().replace('File:', '').replace('.tif', '').replace('.TIF', '').replace('.jpg','').replace('.JPG', '').replace('.jpeg','').replace('.JPEG', '')
 
         picture = Picture()
         picture.url = url
