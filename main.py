@@ -30,7 +30,7 @@ class RandomPictureBot:
 
 
     def random_picture(self):
-        self.logger.info("Fetching random picture...")
+        self.logger.debug("Fetching random picture...")
         pic = self.picture_generator.random_picture()
         self.logger.info("Random picture: %s" % pic)
         return pic
@@ -43,7 +43,7 @@ class RandomPictureBot:
 
 
     def toot(self, picture):
-        self.logger.info("Tooting the picture...")
+        self.logger.debug("Tooting the picture...")
         toot = self.mastodon.toot(picture)
         self.logger.info("Tooted: %s'" % toot)
 
@@ -59,7 +59,7 @@ class RandomPictureBot:
         if pic.link:
             pic.link = self.shorten(pic.link)
         self.db.add(pic)
-        return self.mastodon.toot(pic)
+        return self.toot(pic)
 
 
 if __name__ == '__main__':
