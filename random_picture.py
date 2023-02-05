@@ -79,6 +79,8 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
         title  = metadata['title'] if 'title' in metadata else None
         if title is not None and '}}' in title:
             title = title.split('}}')[0]
+        if title is not None and 'LBS' in title:
+            title = title.split('LBS')[0]
 
         if title is None:
             title = filepage.title().replace('File:', '').replace('.tif', '').replace('.TIF', '').replace('.jpg','').replace('.JPG', '').replace('.jpeg','').replace('.JPEG', '')
