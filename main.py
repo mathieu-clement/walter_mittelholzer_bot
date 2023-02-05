@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 
+from db import FileBasedPublishedImagesDatabase
 from mastodon_client import MastodonClient
 from picture import Picture
 from random_picture import WikimediaCommonsRandomPictureGenerator as PictureGenerator
@@ -13,7 +14,6 @@ class RandomPictureBot:
 
     def __init__(self):
         self.logger = logging.getLogger('wm.RandomPictureBot')
-        self.logger.setLevel(logging.DEBUG)
         self.logger.info('Initializing...')
 
         self.picture_generator = PictureGenerator()
@@ -25,6 +25,8 @@ class RandomPictureBot:
         if 'YOURLS_SIGNATURE' not in os.environ:
             raise Exception('Missing environment variable: YOURLS_SIGNATURE')
         self.shortener = YourlsUrlShortener(os.environ.get('YOURLS_SIGNATURE'))
+
+        self.db = FileBasedPublishedImagesDatabase()
 
 
     def random_picture(self):
@@ -47,19 +49,24 @@ class RandomPictureBot:
 
 
     def fetch_and_post(self):
-        pic = self.random_picture()
+        picture_exists = True
+        while picture_exists:
+            pic = self.random_picture()
+            picture_exists = self.db.is_published(pic)
         pic.download(pic.filename)
         pic.convert_to_jpeg()
 
         if pic.link:
             pic.link = self.shorten(pic.link)
+        self.db.add(pic)
         return self.mastodon.toot(pic)
 
 
 if __name__ == '__main__':
 
-    logger = logging.getLogger('wm')
-    logger.setLevel(logging.DEBUG)
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
     bot = RandomPictureBot()
     bot.fetch_and_post()

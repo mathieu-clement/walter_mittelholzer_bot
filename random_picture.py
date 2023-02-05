@@ -16,7 +16,6 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
     
     def __init__(self):
         self.logger = logging.getLogger('wm.WikimediaCommonsRandomPictureGenerator')
-        self.logger.setLevel(logging.DEBUG)
         site = pywikibot.Site('commons') # Wikimedia Commons
         self.top_category = pywikibot.Category(site, 'Walter Mittelholzer')
         
