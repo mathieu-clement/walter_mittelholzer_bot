@@ -127,3 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+apicache-py3/
+
+.*.swp
+
+
+published_images.txt
+
