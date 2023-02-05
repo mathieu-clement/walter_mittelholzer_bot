@@ -26,6 +26,8 @@ class MastodonClient:
         if picture.link:
             status = status + 'Source: %s\n' % picture.link
 
+        status = status + '#aviation #avgeek #switzerland'
+
         self.logger.info("Status: %s" % status)
         
         media_dict = self.mastodon.media_post(picture.filename, mime_type='image/jpeg') 
