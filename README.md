@@ -14,8 +14,10 @@ variables:
     web interface of your instance
   - `YOURLS_SIGNATURE`: obtain it from the Tools page in the Admin interface
 
-Do note currently the mastodon instance is hardcoded (see [here](mastodon_client.py)). 
-Probably this will be an environment variable in the future.
+Do note currently the mastodon instance is hardcoded (see [here](mastodon_client.py)),
+and so is the YOURLS host.
+Probably these will be environment variables in the future. Feel free to submit a
+Pull Request.
 
 ## Running with podman / docker
 
