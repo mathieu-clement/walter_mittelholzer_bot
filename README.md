@@ -32,6 +32,7 @@ Now you should have a working image.
 Run it like so:
 
 ```bash
+touch published_images.txt && chmod 666 published_images.txt
 podman run --rm \
     -v ./published_images.txt:/src/published_images.txt \
     -e "MASTODON_ACCESS_TOKEN=fJdi2jfi328j-jaslkd" \
