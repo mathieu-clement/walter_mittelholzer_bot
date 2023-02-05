@@ -44,6 +44,10 @@ This will create a new container from the image, fetch an image,
 convert it to JPEG, resize it (Mastodon allows up to 1.6 megapixels only) and create a short
 URL and publish a toot to Mastodon.
 
+The _chmod_ part is a quick and dirty way to avoid permission issues. Ideally you'd want to
+either set the UID properly in the container to match that of the user running the container, 
+or _chown_ it on the host OS to match the one assigned by the guest OS.
+
 ## Limitations
 
 This program has the following known bugs at the moment:
