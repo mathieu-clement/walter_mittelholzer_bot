@@ -77,13 +77,14 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
             start, end = date.replace('{{','').replace('}}','').split('|')[2:4]
             date = "%s - %s" % (start, end)
         title  = metadata['title'] if 'title' in metadata else None
+
+        if title is None:
+            title = filepage.title().replace('File:', '').replace('.tif', '').replace('.TIF', '').replace('.jpg','').replace('.JPG', '').replace('.jpeg','').replace('.JPEG', '')
+        
         if title is not None and '}}' in title:
             title = title.split('}}')[0]
         if title is not None and 'LBS' in title:
             title = title.split('LBS')[0]
-
-        if title is None:
-            title = filepage.title().replace('File:', '').replace('.tif', '').replace('.TIF', '').replace('.jpg','').replace('.JPG', '').replace('.jpeg','').replace('.JPEG', '')
 
         picture = Picture()
         picture.url = url

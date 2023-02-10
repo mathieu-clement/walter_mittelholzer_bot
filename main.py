@@ -75,5 +75,6 @@ if __name__ == '__main__':
         tries = tries + 1
         try:
             bot.fetch_and_post()
+            break
         except YOURLSHTTPError:
             logger.warn('Failed due to YOURLS. Trying again...')
