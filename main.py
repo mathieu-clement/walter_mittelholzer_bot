@@ -9,6 +9,7 @@ from mastodon_client import MastodonClient
 from picture import Picture
 from random_picture import WikimediaCommonsRandomPictureGenerator as PictureGenerator
 from short_url import YourlsUrlShortener
+from yourls.exceptions import YOURLSHTTPError
 
 class RandomPictureBot:
 
@@ -69,4 +70,10 @@ if __name__ == '__main__':
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
     bot = RandomPictureBot()
-    bot.fetch_and_post()
+    tries = 0
+    while tries < 3:
+        tries = tries + 1
+        try:
+            bot.fetch_and_post()
+        except YOURLSHTTPError:
+            logger.warn('Failed due to YOURLS. Trying again...')
