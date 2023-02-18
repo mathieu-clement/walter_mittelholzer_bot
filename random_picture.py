@@ -33,7 +33,8 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
         element = self.random_filepage_or_category(category)
 
         if self.is_category(element):
-            return self.random_filepage(category)
+            self.logger.info("Entering category %s", element)
+            return self.random_filepage(element)
         elif self.is_filepage(element):
             return element
         else:
@@ -41,13 +42,13 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
 
 
     def is_category(self, obj):
-        #return isinstance(obj, pywikibot.Category)
-        return obj.is_categorypage()
+        return isinstance(obj, pywikibot.Category)
+        #return obj.is_categorypage()
 
 
     def is_filepage(self, obj):
-        #return isinstance(obj, pywikibot.FilePage)
-        return obj.is_filepage()
+        return isinstance(obj, pywikibot.FilePage)
+        #return obj.is_filepage()
 
 
     def random_picture(self):

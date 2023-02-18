@@ -33,7 +33,7 @@ class RandomPictureBot:
     def random_picture(self):
         self.logger.debug("Fetching random picture...")
         pic = self.picture_generator.random_picture()
-        self.logger.info("Random picture: %s" % pic)
+        self.logger.debug("Random picture: %s" % pic)
         return pic
 
     
@@ -54,12 +54,17 @@ class RandomPictureBot:
         while picture_exists:
             pic = self.random_picture()
             picture_exists = self.db.is_published(pic)
+            if picture_exists:
+                self.logger.info("Picture '%s' already exists", pic.title)
         pic.download(pic.filename)
         pic.convert_to_jpeg()
 
-        if pic.link:
-            pic.link = self.shorten(pic.link)
-        self.db.add(pic)
+        try:
+            if pic.link:
+                pic.link = self.shorten(pic.link)
+        finally:
+            self.db.add(pic)
+
         return self.toot(pic)
 
 
@@ -70,11 +75,14 @@ if __name__ == '__main__':
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
     bot = RandomPictureBot()
+    max_tries = int(os.environ['WALTER_TRIES']) if 'WALTER_TRIES' in os.environ else 3
     tries = 0
-    while tries < 3:
+    while tries < max_tries:
         tries = tries + 1
         try:
             bot.fetch_and_post()
             break
-        except YOURLSHTTPError:
-            logger.warn('Failed due to YOURLS. Trying again...')
+        except YOURLSHTTPError as e:
+            logger.warning('Failed due to YOURLS. Trying again...', exc_info=e)
+        except Exception as e:
+            logger.warning('Failed due to other exception', exc_info=e)
