@@ -25,7 +25,7 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
         if not elements:
             return None
 
-        return elements[random.randrange(len(elements) - 1)]
+        return elements[random.randrange(len(elements))]
 
 
     def random_filepage(self, category):
