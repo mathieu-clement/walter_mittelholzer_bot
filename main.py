@@ -53,9 +53,10 @@ class RandomPictureBot:
         picture_exists = True
         while picture_exists:
             pic = self.random_picture()
+            self.logger.info('Picture: "%s"', pic.title)
             picture_exists = self.db.is_published(pic)
             if picture_exists:
-                self.logger.info("Picture '%s' already exists", pic.title)
+                self.logger.info('Picture already published')
         pic.download(pic.filename)
         pic.convert_to_jpeg()
 
