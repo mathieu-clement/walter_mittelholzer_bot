@@ -35,7 +35,7 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
         element = self.random_filepage_or_category(category)
 
         if self.is_category(element):
-            self.logger.info("Entering category %s", element)
+            self.logger.info("Entering category %s", element.title().replace('Category:', ''))
             return self.random_filepage(element)
         elif self.is_filepage(element):
             return element
