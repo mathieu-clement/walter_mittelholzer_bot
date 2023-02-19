@@ -2,6 +2,7 @@
 
 import logging
 import random
+import re
 import tempfile
 import pywikibot
 
@@ -15,6 +16,10 @@ class RandomPictureGenerator:
 class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
     
     TITLE_EXCLUSIONS = ('File:', '.tif', '.TIF', '.jpg', '.JPG', '.jpeg', '.JPEG')
+    DATE_YEAR_MONTH_PATTERN = re.compile('(19[0-3][0-9])-([01]?[0-9])')
+    DATE_DAY_MONTH_YEAR_PATTERN = re.compile('([0-3]?[0-9])\.([01]?[0-9])\.(19[0-3][0-9])')
+    DATE_YEAR_MONTH_DAY_PATTERN = re.compile('(19[0-9][0-9])-([01][0-9])-([0-3][0-9])')
+    MONTHS = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
     
     def __init__(self):
         self.logger = logging.getLogger('wm.WikimediaCommonsRandomPictureGenerator')
@@ -35,7 +40,7 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
         element = self.random_filepage_or_category(category)
 
         if self.is_category(element):
-            self.logger.info("Entering category %s", element.title().replace('Category:', ''))
+            self.logger.info('Entering category "%s"', element.title().replace('Category:', ''))
             return self.random_filepage(element)
         elif self.is_filepage(element):
             return element
@@ -73,13 +78,7 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
         self.logger.debug(filepage.get())
         title = self.extract_title(metadata, filepage)
         place = metadata['depicted place'] if 'depicted place' in metadata else None
-        date  = metadata['date'] if 'date' in metadata else None
-        if date is not None and 'Taken on' in date:
-            self.logger.debug("date taken on: %s" % date)
-            date = date.split('|')[1]
-        if date is not None and 'date|between' in date:
-            start, end = date.replace('{{','').replace('}}','').split('|')[2:4]
-            date = "%s - %s" % (start, end)
+        date = self.extract_date(metadata)
 
         picture = Picture()
         picture.url = url
@@ -96,17 +95,69 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
 
     def extract_title(self, metadata, filepage):
         title  = metadata['title'] if 'title' in metadata else filepage.title()
-        self.logger.info('Title before cleaning: %s', title)
+        self.logger.debug('Title before cleaning: %s', title)
 
         if title:
             if '}}' in title:
                 title = title.split('}}')[0]
+
             if 'LBS' in title:
                 title = title.split('LBS')[0]
+
             for exclusion in self.TITLE_EXCLUSIONS:
                 title = title.replace(exclusion, '')
 
+            title = title.strip()
+
         return title
+
+
+    def extract_date(self, metadata):
+        date  = metadata['date'] if 'date' in metadata else None
+        self.logger.info('Date: %s', date)
+        if date:
+            if 'Taken on' in date:
+                self.logger.debug("date taken on: %s" % date)
+                date = date.split('|')[1]
+            elif 'date|between' in date: # {{other date|between|1930|1931}}
+                start, end = date.replace('{{','').replace('}}','').split('|')[2:4]
+                if start != end:
+                    date = "%s - %s" % (start, end)
+                else:
+                    date = start
+            elif 'date|ca|' in date: # {{other date|ca|1934-2}}
+                date = date.split('date|ca|')[1].replace('}}', '')
+            elif 'date|~|' in date: # {{other date|~|1935}}
+                date = date.split('date|~|')[1].replace('}}', '')
+
+            date = self.extract_year_month(date)
+
+        self.logger.info('Clean date: %s', date)
+        return date
+
+
+    def extract_year_month(self, date):
+        # Extract month if format is "YYYY-MM" or "YYYY-M"
+        try:
+            
+            if match := self.DATE_YEAR_MONTH_PATTERN.fullmatch(date): # 1925-02 or 1925-2
+                year = match.group(1)
+                month_number = int(match.group(2))
+                month = self.MONTHS[month_number - 1]
+                return '%s %s' % (month, year)
+            elif match := self.DATE_DAY_MONTH_YEAR_PATTERN.fullmatch(date): # 1.3.1920 (incl. 0 before day and/or month)
+                return self.as_human_date(match.group(1), match.group(2), match.group(3))
+            elif match := self.DATE_YEAR_MONTH_DAY_PATTERN.fullmatch(date): # 1925-12-31
+                return self.as_human_date(match.group(3), match.group(2), match.group(1))
+            else:
+                return date
+        except Exception as e:
+            self.logger.error('Error while processing date "%s"', date, exc_info=e)
+            return date
+
+
+    def as_human_date(self, day, month, year):
+        return '%d %s %s' % (int(day), self.MONTHS[int(month) - 1], year) 
 
 
     def extract_doi_link(self, text):
@@ -136,4 +187,4 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
 if __name__ == '__main__':
 
     gen = WikimediaCommonsRandomPictureGenerator()
-    print(gen.random_picture())
+    print(gen.extract_year_month('1923-12-31'))
