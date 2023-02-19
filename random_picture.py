@@ -14,6 +14,8 @@ class RandomPictureGenerator:
 
 class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
     
+    TITLE_EXCLUSIONS = ('File:', '.tif', '.TIF', '.jpg', '.JPG', '.jpeg', '.JPEG')
+    
     def __init__(self):
         self.logger = logging.getLogger('wm.WikimediaCommonsRandomPictureGenerator')
         site = pywikibot.Site('commons') # Wikimedia Commons
@@ -69,6 +71,7 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
 
         metadata = self.extra_metadata(filepage.get())
         self.logger.debug(filepage.get())
+        title = self.extract_title(metadata, filepage)
         place = metadata['depicted place'] if 'depicted place' in metadata else None
         date  = metadata['date'] if 'date' in metadata else None
         if date is not None and 'Taken on' in date:
@@ -77,15 +80,6 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
         if date is not None and 'date|between' in date:
             start, end = date.replace('{{','').replace('}}','').split('|')[2:4]
             date = "%s - %s" % (start, end)
-        title  = metadata['title'] if 'title' in metadata else None
-
-        if title is None:
-            title = filepage.title().replace('File:', '').replace('.tif', '').replace('.TIF', '').replace('.jpg','').replace('.JPG', '').replace('.jpeg','').replace('.JPEG', '')
-        
-        if title is not None and '}}' in title:
-            title = title.split('}}')[0]
-        if title is not None and 'LBS' in title:
-            title = title.split('LBS')[0]
 
         picture = Picture()
         picture.url = url
@@ -98,6 +92,21 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
         #picture.link = self.extract_doi_link(filepage.get())
 
         return picture
+
+
+    def extract_title(self, metadata, filepage):
+        title  = metadata['title'] if 'title' in metadata else filepage.title()
+        self.logger.info('Title before cleaning: %s', title)
+
+        if title:
+            if '}}' in title:
+                title = title.split('}}')[0]
+            if 'LBS' in title:
+                title = title.split('LBS')[0]
+            for exclusion in self.TITLE_EXCLUSIONS:
+                title = title.replace(exclusion, '')
+
+        return title
 
 
     def extract_doi_link(self, text):
