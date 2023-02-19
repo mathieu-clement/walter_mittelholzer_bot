@@ -114,7 +114,7 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
 
     def extract_date(self, metadata):
         date  = metadata['date'] if 'date' in metadata else None
-        self.logger.info('Date: %s', date)
+        self.logger.debug('Date: %s', date)
         if date:
             if 'Taken on' in date:
                 self.logger.debug("date taken on: %s" % date)
@@ -132,7 +132,7 @@ class WikimediaCommonsRandomPictureGenerator(RandomPictureGenerator):
 
             date = self.extract_year_month(date)
 
-        self.logger.info('Clean date: %s', date)
+        self.logger.debug('Clean date: %s', date)
         return date
 
 
