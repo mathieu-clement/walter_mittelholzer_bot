@@ -15,7 +15,7 @@ class MastodonClient:
         status = 'Picture of the Day\n\n'
 
         if picture.title:
-            status = status + 'Title: %s\n' % picture.title
+            status = status + 'Description: %s\n' % picture.title
         
         if picture.place:
             status = status + 'Location: %s\n' % picture.place
@@ -26,7 +26,7 @@ class MastodonClient:
         if picture.link:
             status = status + 'Source: %s\n' % picture.link
 
-        status = status + '#aviation #avgeek #switzerland'
+        status = status + '#aviation #avgeek'
 
         self.logger.info("Status: %s" % status)
         
